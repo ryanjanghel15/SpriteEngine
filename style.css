@@ -1,0 +1,63 @@
+*{
+    font-family: Roboto Mono;
+}
+body{
+    background-color: rgb(160, 160, 160);
+    overflow: auto;
+}
+#stage{
+    position: relative;
+    background-color:aquamarine ;
+    display:grid;
+    margin-top: 100px;
+    margin-left: 100px;
+}
+#debugMenu{
+    position: absolute;
+    z-index: 100px;
+    top:0px;
+    color: white;
+    height: 100vh;
+    width: 100vw;
+}
+
+#debugMenu .DebugInicator{
+    color: white;
+    background-color: rgba(0, 0, 0, 0.325);
+    display:inline-block;
+}
+
+#WaterMrkIndiacator{
+    position: absolute;
+    bottom: 50px;
+    right: 50px;
+    display: flex;
+    background-color: rgba(0, 0, 0, 0.325);
+    flex-direction: column;
+    gap:0px
+}
+#WaterMrkIndiacator img{
+    height:200px
+}
+#WaterMrkIndiacator p{
+    margin:0px;
+}
+.Obsicles[data-type = "0"]{
+}
+
+.Obsicles[data-type = "1"]{
+    background-color: rgb(255, 118, 118);
+
+}
+
+.Entity{
+    height: 30px;
+    width: 30px;
+    position: absolute;
+    
+}
+
+@font-face {
+    font-family: Roboto Mono;
+    src: url(/Media/Font/static/RobotoMono-Regular.ttf);
+}
