@@ -1,0 +1,8 @@
+{
+    "NameOfMap":"Sample1",
+    "TabCover":"Media/TabCover/TabCover-removebg-preview.png",
+    "WaterMark":"Media/WaterMark/WaterMark1.png",
+    "XtoYratio": [6 , 4],
+    "plot":[1,0,0,0,0,0,1,0,1,1,1,0,0,0,1,1,1,0,1,0,0,1,1,0],
+    "stageDimentions" : [600 ,400]
+}
