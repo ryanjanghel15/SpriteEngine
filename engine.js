@@ -12,12 +12,7 @@ let debugMenuShow = false;
 let keydown = "";
 let controlKeys = []
 let AllotControlanimationId = null;
-let EngineLoop = () => { }
-
-// Import Data //
-
-//
-
+let EngineLoopList = []
 
 
 // Function Area //
@@ -30,8 +25,20 @@ function IncializeGame() {
     debugMenuShow = false;
     DebugMenuShow()
     keydown = "";
+    EngineLoopList = []
 
 
+}
+
+function SetEngineLoop(func) {
+    EngineLoopList.push(func);
+}
+
+function EngineLoop() {
+    EngineLoopList.forEach(func => {
+        func()
+    })
+    requestAnimationFrame(EngineLoop)
 }
 
 function RetainControl() {
@@ -74,21 +81,6 @@ function DebugMenuShow() {
 
 
 }
-function Loop() { }
-function SetEngineLoop(func) {
-    EngineLoop = func;
-
-    function Loop() {
-        EngineLoop();
-        requestAnimationFrame(Loop);
-    }
-
-    requestAnimationFrame(Loop);
-}
-
-
-
-//
 
 // Key Detection
 addEventListener("keydown", (e) => {
@@ -346,6 +338,7 @@ class Entity {
         requestAnimationFrame(() => this.UpdateCoordinates());
     }
     AllotControl(speed) {
+        SetEngineLoop(() => { 
         let player = this.Entity
         let playerSpeed = speed;
         this.speed = speed
@@ -367,7 +360,20 @@ class Entity {
         if (controlKeys.includes("d") && playerX <= (this.Stage.clientWidth - 4 * playerSpeed) && !controlKeys.includes("a") && this.moveList.Right) {
             playerX += playerSpeed;
         }
-
+        //
+        if (playerY <= playerSpeed && controlKeys.includes("w")) {
+            playerY = 0
+        }
+        if (controlKeys.includes("s") && playerY >= (this.Stage.clientHeight - 4 * playerSpeed)) {
+            playerY = this.Stage.clientHeight - this.Entity.offsetHeight;
+        }
+        if (controlKeys.includes("a") && playerX <= playerSpeed) {
+            playerX = 0;
+        }
+        if (controlKeys.includes("d") && playerX >= (this.Stage.clientWidth - 4 * playerSpeed)) {
+            playerX = this.Stage.clientWidth - this.Entity.clientWidth;
+        }
+        //
         if (!this.moveList.Up && !controlKeys.includes("s") && controlKeys.includes("w")) {
             playerY = this.ColliderData.top[0].offsetTop + this.ColliderData.top[0].offsetHeight
         }
@@ -381,10 +387,13 @@ class Entity {
         if (!this.moveList.Right && !controlKeys.includes("a") && controlKeys.includes("d")) {
             playerX = this.ColliderData.right[0].offsetLeft - this.Entity.offsetWidth
         }
+
+
         document.getElementById('PlayerCordsIndicator').textContent = `Player : ${playerX}, ${playerY}`
         player.style.top = playerY + "px"
         player.style.left = playerX + "px"
-        AllotControlanimationId = requestAnimationFrame(() => this.AllotControl(speed));
+        })
+
     }
 
     AddCollisionDetection() {
@@ -434,6 +443,7 @@ class Entity {
                             this.ColliderData[Box.dataset.collisionside].push(BoxB);
                             //console.log(this.ColliderData);
                             //console.log("/")
+                            Box.style.backgroundColor = "purple"
                             switch (Box.dataset.collisionside) {
 
                                 case "top":
@@ -454,44 +464,13 @@ class Entity {
                             }
 
                         }
-                        Object.entries(this.ColliderData).forEach((n) => {
-                            //console.log(n)
-                        })
                     })
                 })
             })
-            /*
-        Object.entries(this.ColliderData).forEach((data) => {
-            let collider = document.querySelectorAll(`${data[1].collider}`);
-            Object.keys(data[1].collisions).forEach(side => {
-                data[1].collisions[side] = null;
-            });
-            
-        })
-        */
+           
             requestAnimationFrame(() => { CollisionLoop() });
         }
         CollisionLoop();
-        /*
-        let collider = document.querySelectorAll(`${Collider}`);
-        
-        AllcollisionBox.forEach((Box) => {
-            this.collisionList[Box.dataset.collisionside] = null;
-        });
-
-        AllcollisionBox.forEach((Box) => {
-            collider.forEach((BoxB) => {
-                if (
-                    Box.getBoundingClientRect().left < BoxB.getBoundingClientRect().right &&
-                    Box.getBoundingClientRect().right > BoxB.getBoundingClientRect().left &&
-                    Box.getBoundingClientRect().top < BoxB.getBoundingClientRect().bottom &&
-                    Box.getBoundingClientRect().bottom > BoxB.getBoundingClientRect().top
-                ) {
-                    this.collisionList[Box.dataset.collisionside] = BoxB;
-                }
-                //console.log(this.collisionList.top);
-            });
-        });*/
 
     }
     UpdataCollisionBox() {
@@ -695,4 +674,5 @@ export const Engine = {
     }
 
 }
+EngineLoop();
 //

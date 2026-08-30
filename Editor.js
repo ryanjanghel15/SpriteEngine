@@ -35,6 +35,9 @@ let enemy = new Engine.Entity(
     [150, 200],
     stage1
 );
+Engine.SetEngineLoop(()=>{
+    console.log("hello")
+})
 player.AllotControl(10);
 player.AddCollisionDetection();
 player.AddCollisionBehavior(`.Obsicles[data-type = "1"]`)
@@ -45,7 +48,3 @@ Engine.DebugMenu.AddDebugIndicator(
     () => Engine.keydown,
     "keypressS"
 );
-
-Engine.SetEngineLoop(() => {
-    console.log(player.speed);
-});
