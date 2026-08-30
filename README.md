@@ -33,4 +33,4 @@ Other Files are just Optional, Occording to the User requiremnet.
 4.Optimized Looping fuctions
 
 <br>
-<p align="right" >Developed By `@ryanjanghel15`</p>
+<p align="right" >Developed By @ryanjanghel15</p>
