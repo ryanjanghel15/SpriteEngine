@@ -1,11 +1,5 @@
-//On Page Elements //\
+//On Page Elements 🥹 //
 const debugMenu = document.getElementById("debugMenu");
-
-//Debug Indicators //
-const keypressIndicator = document.getElementById('keypressIndicator');
-const PlayerCordsIndicator = document.getElementById("PlayerCordsIndicator");
-const WaterMrkIndiacator = document.getElementById("WaterMrkIndiacatorImg")
-const RanDomIndicator = document.getElementById('RanDomIndicator');
 
 //JUst Vatribles 👍//
 let debugMenuShow = false;
@@ -13,6 +7,7 @@ let keydown = "";
 let controlKeys = []
 let AllotControlanimationId = null;
 let EngineLoopList = []
+let MoveLoopList = []
 
 
 // Function Area //
@@ -28,6 +23,10 @@ function IncializeGame() {
     EngineLoopList = []
 
 
+}
+
+function SetMovementLoop(func){
+    
 }
 
 function SetEngineLoop(func) {
@@ -85,7 +84,6 @@ function DebugMenuShow() {
 // Key Detection
 addEventListener("keydown", (e) => {
     keydown = e.key
-    keypressIndicator.textContent = `Key Pressed :${keydown}`
     switch (e.key) {
         case "`":
             debugMenuShow = !debugMenuShow;
@@ -132,13 +130,15 @@ class DebugMenu {
         WtMEle.innerHTML = `<p>${msg}</p> <img src="${url}" id="WaterMrkIndiacatorImg">`
         debugMenu.appendChild(WtMEle)
     }
-    static AddDebugIndicator(Func, IndName) {
-
-        let pIndcator = document.createElement("p")
-        pIndcator.setAttribute("id", `${IndName}Indicator`)
-        pIndcator.setAttribute("class", `DebugInicator`)
-        debugMenu.appendChild(pIndcator)
-        SetEngineLoop(() => { pIndcator.textContent = Func() })
+    static AddDebugIndicator(DisplayTitle, Value) {
+        let PEle = document.createElement("p");
+        PEle.setAttribute("id", `${DisplayTitle}`);
+        PEle.classList.add("DebugInicator")
+        debugMenu.appendChild(PEle);
+        debugMenu.appendChild(document.createElement("br"));
+        SetEngineLoop(() => {
+            PEle.textContent = DisplayTitle + ":" + Value()
+        })
     }
 }
 
@@ -228,14 +228,18 @@ class Stage {
     }
 }
 class Entity {
+    static EntityList = [];
     constructor(Name, Sprite, Pose, Stage) {
         this.Name = Name
         this.Entity
         this.Sprite = Sprite
         this.position = Pose
         this.speed
+        this.Friction = 0;
         this.X //READ ONLY
         this.Y //READ ONLY
+        this.DeltaX //Calc & Read ONLY
+        this.DeltaY //Calc & Read ONLY
         this.Stage = Stage.stage
         this.StageObj = Stage
         this.Xforce = 0
@@ -269,19 +273,22 @@ class Entity {
 
         };
 
-        let Entity = document.createElement("div");
-        Entity.classList.add("Entity");
-        Entity.style.position = "absolute";
-        Entity.setAttribute("name", this.Name);
+        let EntityEle = document.createElement("div");
+        EntityEle.classList.add("Entity");
+        EntityEle.style.position = "absolute";
+        EntityEle.setAttribute("name", this.Name);
 
         console.log(this.Stage)
-        this.StageObj.EntityLayer.appendChild(Entity);
-        this.Entity = Entity
+        this.StageObj.EntityLayer.appendChild(EntityEle);
+        this.Entity = EntityEle
         this.UpdateSprite()
         this.UpdatePosition()
         this.X = this.Entity.offsetLeft
         this.Y = this.Entity.offsetTop
         this.UpdateCoordinates()
+        SetEngineLoop(() => { this.CollisionLoop() });
+        this.ForceLoop()
+        Entity.EntityList.push(this)
     }
     UpdateSprite() {
         let Entity = document.getElementsByName(this.Name)[0]
@@ -338,64 +345,60 @@ class Entity {
         requestAnimationFrame(() => this.UpdateCoordinates());
     }
     AllotControl(speed) {
-        SetEngineLoop(() => { 
-        let player = this.Entity
-        let playerSpeed = speed;
-        this.speed = speed
-        let playerX = player.offsetLeft
-        let playerY = player.offsetTop
+        SetEngineLoop(() => {
+            let player = this.Entity
+            let playerSpeed = speed;
+            this.speed = speed
+            let playerX = player.offsetLeft
+            let playerY = player.offsetTop
 
-        if (controlKeys.length > 1) {
-            this.speed = speed / Math.sqrt(2)
-        }
-        if (controlKeys.includes("w") && playerY >= playerSpeed && !controlKeys.includes("s") && this.moveList.Up) {
-            playerY -= playerSpeed;
-        }
-        if (controlKeys.includes("s") && playerY <= (this.Stage.clientHeight - 4 * playerSpeed) && !controlKeys.includes("w") && this.moveList.Down) {
-            playerY += playerSpeed;
-        }
-        if (controlKeys.includes("a") && playerX >= playerSpeed && !controlKeys.includes("d") && this.moveList.Left) {
-            playerX -= playerSpeed;
-        }
-        if (controlKeys.includes("d") && playerX <= (this.Stage.clientWidth - 4 * playerSpeed) && !controlKeys.includes("a") && this.moveList.Right) {
-            playerX += playerSpeed;
-        }
-        //
-        if (playerY <= playerSpeed && controlKeys.includes("w")) {
-            playerY = 0
-        }
-        if (controlKeys.includes("s") && playerY >= (this.Stage.clientHeight - 4 * playerSpeed)) {
-            playerY = this.Stage.clientHeight - this.Entity.offsetHeight;
-        }
-        if (controlKeys.includes("a") && playerX <= playerSpeed) {
-            playerX = 0;
-        }
-        if (controlKeys.includes("d") && playerX >= (this.Stage.clientWidth - 4 * playerSpeed)) {
-            playerX = this.Stage.clientWidth - this.Entity.clientWidth;
-        }
-        //
-        if (!this.moveList.Up && !controlKeys.includes("s") && controlKeys.includes("w")) {
-            playerY = this.ColliderData.top[0].offsetTop + this.ColliderData.top[0].offsetHeight
-        }
-        if (!this.moveList.Down && !controlKeys.includes("w") && controlKeys.includes("s")) {
-            playerY = this.ColliderData.bottom[0].offsetTop - this.Entity.offsetHeight
-            console.log("GG")
-        }
-        if (!this.moveList.Left && !controlKeys.includes("d") && controlKeys.includes("a")) {
-            playerX = this.ColliderData.left[0].offsetLeft + this.ColliderData.left[0].offsetWidth
-        }
-        if (!this.moveList.Right && !controlKeys.includes("a") && controlKeys.includes("d")) {
-            playerX = this.ColliderData.right[0].offsetLeft - this.Entity.offsetWidth
-        }
+            if (controlKeys.length > 1) {
+                this.speed = speed / Math.sqrt(2)
+            }
+            if (controlKeys.includes("w") && playerY >= playerSpeed && !controlKeys.includes("s") && this.moveList.Up) {
+                playerY -= playerSpeed;
+            }
+            if (controlKeys.includes("s") && playerY <= (this.Stage.clientHeight - 4 * playerSpeed) && !controlKeys.includes("w") && this.moveList.Down) {
+                playerY += playerSpeed;
+            }
+            if (controlKeys.includes("a") && playerX >= playerSpeed && !controlKeys.includes("d") && this.moveList.Left) {
+                playerX -= playerSpeed;
+            }
+            if (controlKeys.includes("d") && playerX <= (this.Stage.clientWidth - 4 * playerSpeed) && !controlKeys.includes("a") && this.moveList.Right) {
+                playerX += playerSpeed;
+            }
+            //
+            if (playerY <= playerSpeed && controlKeys.includes("w")) {
+                playerY = 0
+            }
+            if (controlKeys.includes("s") && playerY >= (this.Stage.clientHeight)) {
+                playerY = this.Stage.clientHeight - this.Entity.offsetHeight;
+            }
+            if (controlKeys.includes("a") && playerX <= playerSpeed) {
+                playerX = 0;
+            }
+            if (controlKeys.includes("d") && playerX >= (this.Stage.clientWidth)) {
+                playerX = this.Stage.clientWidth - this.Entity.clientWidth;
+            }
+            //
+            if (!this.moveList.Up && !controlKeys.includes("s") && controlKeys.includes("w")) {
+                playerY = this.ColliderData.top[0].offsetTop + this.ColliderData.top[0].offsetHeight
+            }
+            if (!this.moveList.Down && !controlKeys.includes("w") && controlKeys.includes("s")) {
+                playerY = this.ColliderData.bottom[0].offsetTop - this.Entity.offsetHeight
+            }
+            if (!this.moveList.Left && !controlKeys.includes("d") && controlKeys.includes("a")) {
+                playerX = this.ColliderData.left[0].offsetLeft + this.ColliderData.left[0].offsetWidth
+            }
+            if (!this.moveList.Right && !controlKeys.includes("a") && controlKeys.includes("d")) {
+                playerX = this.ColliderData.right[0].offsetLeft - this.Entity.offsetWidth
+            }
 
-
-        document.getElementById('PlayerCordsIndicator').textContent = `Player : ${playerX}, ${playerY}`
-        player.style.top = playerY + "px"
-        player.style.left = playerX + "px"
+            player.style.top = playerY + "px"
+            player.style.left = playerX + "px"
         })
 
     }
-
     AddCollisionDetection() {
         const CollisionDataList = ["top", "bottom", "left", "right", "topLeft", "topRight", "bottomLeft", "bottomRight"]
         CollisionDataList.forEach((listData) => {
@@ -410,68 +413,116 @@ class Entity {
 
     }
     AddCollisionBehavior(Collider) {
-        this.DetectCollisionList.push(Collider);
-        console.log(...this.DetectCollisionList)
+        if (!this.DetectCollisionList.includes(Collider)) {
+            this.DetectCollisionList.push(Collider);
+            console.log(...this.DetectCollisionList)
+        }
+    }
+    RetainCollisionBehavior(Collider) {
+        if (this.DetectCollisionList.indexOf(Collider) !== -1) {
+            this.DetectCollisionList.splice(this.DetectCollisionList.indexOf(Collider), 1)
+        }
+    }
+    CollisionLoop() {
+        this.moveList = {
+            Up: true,
+            Down: true,
+            Left: true,
+            Right: true
+        };
+        this.ColliderData = {
+            top: [],
+            bottom: [],
+            left: [],
+            right: [],
+            topLeft: [],
+            topRight: [],
+            bottomLeft: [],
+            bottomRight: []
+
+        };
         let AllcollisionBox = document.querySelectorAll(`.collisionBox[data-forentity="${this.Name}"]`);
-        const CollisionLoop = () => {
-            this.moveList = {
-                Up: true,
-                Down: true,
-                Left: true,
-                Right: true
-            };
-            this.ColliderData = {
-                top: [],
-                bottom: [],
-                left: [],
-                right: [],
-                topLeft: [],
-                topRight: [],
-                bottomLeft: [],
-                bottomRight: []
+        AllcollisionBox.forEach((Box) => {
+            switch (Box.dataset.collisionside) {
 
-            };
-            AllcollisionBox.forEach((Box) => {
-                this.DetectCollisionList.forEach((Data) => {
-                    document.querySelectorAll(`${Data}`).forEach((BoxB) => {
-                        if (
-                            Box.getBoundingClientRect().left < BoxB.getBoundingClientRect().right &&
-                            Box.getBoundingClientRect().right > BoxB.getBoundingClientRect().left &&
-                            Box.getBoundingClientRect().top < BoxB.getBoundingClientRect().bottom &&
-                            Box.getBoundingClientRect().bottom > BoxB.getBoundingClientRect().top
-                        ) {
-                            this.ColliderData[Box.dataset.collisionside].push(BoxB);
-                            //console.log(this.ColliderData);
-                            //console.log("/")
-                            Box.style.backgroundColor = "purple"
-                            switch (Box.dataset.collisionside) {
+                // TOP
+                case "top":
+                    Box.style.backgroundColor = "red"
+                    break;
 
-                                case "top":
-                                    this.moveList.Up = false;
-                                    break;
+                // BOTTOM
+                case "bottom":
+                    Box.style.backgroundColor = "red"
+                    break;
 
-                                case "bottom":
-                                    this.moveList.Down = false;
-                                    break;
+                // LEFT
+                case "left":
+                    Box.style.backgroundColor = "red"
+                    break;
 
-                                case "left":
-                                    this.moveList.Left = false;
-                                    break;
+                // RIGHT
+                case "right":
+                    Box.style.backgroundColor = "red"
+                    break;
 
-                                case "right":
-                                    this.moveList.Right = false;
-                                    break;
-                            }
+                // TOP LEFT
+                case "topLeft":
+                    Box.style.backgroundColor = "yellow"
 
+                    break;
+
+                // TOP RIGHT
+                case "topRight":
+                    Box.style.backgroundColor = "yellow"
+
+                    break;
+
+                // BOTTOM LEFT
+                case "bottomLeft":
+                    Box.style.backgroundColor = "yellow"
+
+                    break;
+                // BOTTOM RIGHT
+                case "bottomRight":
+                    Box.style.backgroundColor = "yellow"
+
+                    break;
+            }
+            this.DetectCollisionList.forEach((Data) => {
+                document.querySelectorAll(`${Data}`).forEach((BoxB) => {
+                    if (
+                        Box.getBoundingClientRect().left < BoxB.getBoundingClientRect().right &&
+                        Box.getBoundingClientRect().right > BoxB.getBoundingClientRect().left &&
+                        Box.getBoundingClientRect().top < BoxB.getBoundingClientRect().bottom &&
+                        Box.getBoundingClientRect().bottom > BoxB.getBoundingClientRect().top
+                    ) {
+                        this.ColliderData[Box.dataset.collisionside].push(BoxB);
+                        //console.log(this.ColliderData);
+                        //console.log("/")
+                        Box.style.backgroundColor = "purple"
+                        switch (Box.dataset.collisionside) {
+
+                            case "top":
+                                this.moveList.Up = false;
+                                break;
+
+                            case "bottom":
+                                this.moveList.Down = false;
+                                break;
+
+                            case "left":
+                                this.moveList.Left = false;
+                                break;
+
+                            case "right":
+                                this.moveList.Right = false;
+                                break;
                         }
-                    })
+
+                    }
                 })
             })
-           
-            requestAnimationFrame(() => { CollisionLoop() });
-        }
-        CollisionLoop();
-
+        })
     }
     UpdataCollisionBox() {
 
@@ -498,8 +549,6 @@ class Entity {
 
                     ele.style.height =
                         `${this.speed}px`;
-
-                    ele.style.backgroundColor = "red";
                     ele.style.position = "absolute";
 
                     break;
@@ -519,8 +568,6 @@ class Entity {
 
                     ele.style.height =
                         `${this.speed}px`;
-
-                    ele.style.backgroundColor = "red";
                     ele.style.position = "absolute";
 
                     break;
@@ -540,8 +587,6 @@ class Entity {
 
                     ele.style.height =
                         `${this.Entity.offsetHeight}px`;
-
-                    ele.style.backgroundColor = "red";
                     ele.style.position = "absolute";
 
                     break;
@@ -560,8 +605,6 @@ class Entity {
 
                     ele.style.height =
                         `${this.Entity.offsetHeight}px`;
-
-                    ele.style.backgroundColor = "red";
                     ele.style.position = "absolute";
 
                     break;
@@ -581,8 +624,6 @@ class Entity {
 
                     ele.style.height =
                         `${this.speed}px`;
-
-                    ele.style.backgroundColor = "yellow";
                     ele.style.position = "absolute";
 
                     break;
@@ -602,8 +643,6 @@ class Entity {
 
                     ele.style.height =
                         `${this.speed}px`;
-
-                    ele.style.backgroundColor = "yellow";
                     ele.style.position = "absolute";
 
                     break;
@@ -623,8 +662,6 @@ class Entity {
 
                     ele.style.height =
                         `${this.speed}px`;
-
-                    ele.style.backgroundColor = "yellow";
                     ele.style.position = "absolute";
 
                     break;
@@ -644,8 +681,6 @@ class Entity {
 
                     ele.style.height =
                         `${this.speed}px`;
-
-                    ele.style.backgroundColor = "yellow";
                     ele.style.position = "absolute";
 
                     break;
@@ -656,6 +691,31 @@ class Entity {
         requestAnimationFrame(() => {
             this.UpdataCollisionBox();
         });
+    }
+    AddForce(X,Y){
+        this.Xforce += X;
+        this.Yforce += Y;
+    }
+    ForceLoop(){
+        SetEngineLoop(()=>{
+            
+        if(this.Xforce != 0){this.Xforce -= Math.sign(this.Xforce)*this.Friction;}
+        if(this.Yforce != 0){this.Yforce -= Math.sign(this.Yforce)*this.Friction;}
+
+        const playerX = this.Entity.offsetLeft;
+        const playerY = this.Entity.offsetTop;
+        if(!this.moveList.Left || !this.moveList.Right || playerX <= 0 || playerX+this.Entity.offsetWidth >= this.Stage.offsetHeight){
+            this.Xforce *= -1
+        }
+        if(!this.moveList.Up || !this.moveList.Down || playerY <= 0 || playerY+this.Entity.offsetHeight >= this.Stage.offsetHeight){
+            this.Yforce *= -1
+        }
+        this.Entity.style.left =
+            `${playerX + this.Xforce}px`;
+
+        this.Entity.style.top =
+            `${playerY + this.Yforce}px`;
+        })
     }
 }
 
