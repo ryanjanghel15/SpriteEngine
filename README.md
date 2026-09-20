@@ -1,4 +1,4 @@
-># SpriteEngine ```Version α-1.0```
+># SpriteEngine ```Version α-2.0```
 Its a Pre-developed Physics Engine Ment for easy implenetation of in real life physics in the web development coumunity.
 
 Sprite Engine is based on Java Script, well known to the the web development coumunity
@@ -40,6 +40,14 @@ Visit: <span title="Not Availble">[SpriteEngine Documentation(🛠️Not Availbl
 2. Besic Physics simulation
 3. More Better functions
 4. Added Force Simulation
+
+<span style="background: #ff000084;">=== Update!! *Version α-2.0* ===</span>
+
+1. Bugs of Collision Behavior fixed.
+2. Updated <span style="color:yellow;"><u>```DebugMenu```</u></span> Class having ```DebugEle``` which makes elements show up when Debug Menu is opened.
+3. Added <span style="color:blue;"><u>```ExperimentalProtection```</u></span>  in <span style="color:yellow;"><u>```Engine```</u></span> Class
+4. New <span style="color:yellow;"><u>```Geometry```</u></span> Class Including Line Draw.
+
 
 <br>
 <p align="right" >Developed By @ryanjanghel15</p>

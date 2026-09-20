@@ -6,8 +6,8 @@ let debugMenuShow = false;
 let keydown = "";
 let controlKeys = []
 let AllotControlanimationId = null;
-let EngineLoopList = []
-let MoveLoopList = []
+let EngineLoopList = [];
+let DisplayedWarn = false;
 
 
 // Function Area //
@@ -25,9 +25,10 @@ function IncializeGame() {
 
 }
 
-function SetMovementLoop(func){
-    
+function DiffOf(a, b) {
+    return Math.max(a, b) - Math.min(a, b)
 }
+
 
 function SetEngineLoop(func) {
     EngineLoopList.push(func);
@@ -48,46 +49,13 @@ function RetainControl() {
 }
 
 
-function DebugMenuShow() {
-    if (debugMenuShow) {
-        debugMenu.style.opacity = 1;
-        document.querySelectorAll(".tileDataIndicator").forEach(tile => {
-            tile.style.opacity = 1;
-        })
-        document.querySelectorAll(".collisionBoxEle").forEach((box) => {
-            box.style.opacity = 1;
-        })
-        document.querySelectorAll(".collisionBox").forEach((box) => {
-            box.style.opacity = 0.4;
-            console.log(`${box.style.opacity}`);
-        })
-    }
-    else {
-        debugMenu.style.opacity = 0;
-        document.querySelectorAll(".tileDataIndicator").forEach(tile => {
-            tile.style.opacity = 0;
-        })
-        document.querySelectorAll(".collisionBoxEle").forEach((box) => {
-            box.style.opacity = 0;
-        })
-        document.querySelectorAll(".collisionBox").forEach((box) => {
-            box.style.opacity = 0;
-            console.log(`${box.style.opacity}`);
-        })
-    }
-    console.log(`debugMenuShow = ${debugMenuShow};`);
-    console.log(`debugMenu.style.opacity = ${debugMenu.style.opacity}`);
-
-
-}
-
 // Key Detection
 addEventListener("keydown", (e) => {
     keydown = e.key
     switch (e.key) {
         case "`":
             debugMenuShow = !debugMenuShow;
-            DebugMenuShow()
+            DebugMenu.Show();
             break;
     }
 
@@ -124,6 +92,48 @@ class Page {
 }
 
 class DebugMenu {
+    static DebugEle = class DebugEle{
+        constructor(Ele,Opacity){
+            Ele.classList.add("DebugEle")
+            Ele.dataset.opacval = Opacity;
+            Ele.style.opacity = 0;
+        }
+    }
+    static Show() {
+    if (debugMenuShow) {
+        debugMenu.style.opacity = 1;
+        document.querySelectorAll(".tileDataIndicator").forEach(tile => {
+            tile.style.opacity = 1;
+        })
+        document.querySelectorAll(".collisionBoxEle").forEach((box) => {
+            box.style.opacity = 1;
+        })
+        document.querySelectorAll(".collisionBox").forEach((box) => {
+            box.style.opacity = 0.4;
+        })
+        document.querySelectorAll(".DebugEle").forEach((Ele)=>{
+            Ele.style.opacity = Ele.dataset.opacval;
+        })
+    }
+    else {
+        debugMenu.style.opacity = 0;
+        document.querySelectorAll(".tileDataIndicator").forEach(tile => {
+            tile.style.opacity = 0;
+        })
+        document.querySelectorAll(".collisionBoxEle").forEach((box) => {
+            box.style.opacity = 0;
+        })
+        document.querySelectorAll(".collisionBox").forEach((box) => {
+            box.style.opacity = 0;
+        })
+        document.querySelectorAll(".DebugEle").forEach((Ele)=>{
+            Ele.style.opacity = 0;
+        })
+    }
+
+
+}
+
     static WaterMrk(url, msg) {
         let WtMEle = document.createElement("div")
         WtMEle.setAttribute("id", "WaterMrkIndiacator")
@@ -149,6 +159,7 @@ class Stage {
         this.MapData = null;
         this.EntityLayer
         this.PlotLayer
+        this.OtherLayer
 
 
         this.stage = document.createElement("div");
@@ -165,15 +176,24 @@ class Stage {
         this.BuildMap(this.MapData);
     }
     BuildMap(placeholder) {
-        this.stage.style.width = `${placeholder.stageDimentions[0]}px`;
-        this.stage.style.height = `${placeholder.stageDimentions[1]}px`;
+        this.stage.style.width = `${placeholder.stageDimentions[0]}`;
+        this.stage.style.height = `${placeholder.stageDimentions[1]}`;
         this.stage.style.position = "relative"
+        //
         this.EntityLayer = document.createElement("div")
         this.EntityLayer.classList.add("EntityLayer")
         this.EntityLayer.style.position = "absolute"
-        this.EntityLayer.style.width = `${placeholder.stageDimentions[0]}px`;
-        this.EntityLayer.style.height = `${placeholder.stageDimentions[1]}px`;
+        this.EntityLayer.style.width = `${placeholder.stageDimentions[0]}`;
+        this.EntityLayer.style.height = `${placeholder.stageDimentions[1]}`;
         this.stage.appendChild(this.EntityLayer);
+        //
+        this.OtherLayer = document.createElement("div")
+        this.OtherLayer.classList.add("OtherLayer")
+        this.OtherLayer.style.zIndex = 10;
+        this.OtherLayer.style.position = "absolute"
+        this.OtherLayer.style.width = `${placeholder.stageDimentions[0]}`;
+        this.OtherLayer.style.height = `${placeholder.stageDimentions[1]}`;
+        this.stage.appendChild(this.OtherLayer);
         if (placeholder.plot != false) {
             this.PlotLayer = document.createElement("div")
             this.PlotLayer.style.position = "absolute"
@@ -199,8 +219,10 @@ class Stage {
                 this.PlotLayer.appendChild(tile);
                 tileDataIndicator.style.opacity = 0;
             });
-            this.PlotLayer.style.width = `${placeholder.stageDimentions[0]}px`;
-            this.PlotLayer.style.height = `${placeholder.stageDimentions[1]}px`;
+            this.PlotLayer.style.width = `${placeholder.stageDimentions[0]}`;
+            this.PlotLayer.style.height = `${placeholder.stageDimentions[1]}`;
+            this.PlotLayer.style.top = "0px";
+            this.PlotLayer.style.left = "0px";
 
             this.stage.appendChild(this.PlotLayer)
         }
@@ -226,6 +248,44 @@ class Stage {
 
         return data;
     }
+}
+class Geometry {
+    static Line = class Line {
+        constructor(Name, Stage, [x1, y1], [x2, y2], width) {
+            this.Name = Name;
+            this.Stage = Stage;
+            this.Line;
+            this.from = [x1, y1];
+            this.to = [x2, y2];
+            this.width = width;
+            this.length;
+            this.Line = document.createElement('div');
+            this.Line.classList.add("line")
+            this.Line.style.borderRadius = `${this.width/2}px`
+            this.Line.style.backgroundColor = "black"
+            this.Line.style.position = "absolute";
+            this.ChangePosition(this.from,this.to);
+            Stage.OtherLayer.appendChild(this.Line)
+            this.Line.setAttribute("name", this.Name)
+        }
+        ChangePosition([x1, y1], [x2, y2]) {
+            this.from = [x1, y1];
+            this.to = [x2, y2];
+            
+            /*Who said CS don't have Math😭*/
+            this.Line.style.height = `${this.width}px`;
+            this.Line.style.width = `${Math.sqrt((DiffOf(x1, x2)) ** 2 + (DiffOf(y1, y2)) ** 2)}px`;
+            this.length = Math.sqrt((DiffOf(x1, x2)) ** 2 + (DiffOf(y1, y2)) ** 2);
+            let theta = Math.atan(DiffOf(y1, y2) / DiffOf(x1, x2)) * 180 / Math.PI;
+            if (y1 > y2) {theta = -theta;}
+            if (x1 > x2) {theta = 180 - theta;}
+            this.Line.style.rotate = `${theta}deg`
+            this.Line.style.top = `${y1}px`
+            this.Line.style.left = `${x1}px`
+
+        }
+    }
+    static DistanceOfEle(){}
 }
 class Entity {
     static EntityList = [];
@@ -272,7 +332,12 @@ class Entity {
             bottomRight: []
 
         };
-
+        this.Move = {
+            Up: true,
+            Down: true,
+            Left: true,
+            Right: true,
+        }
         let EntityEle = document.createElement("div");
         EntityEle.classList.add("Entity");
         EntityEle.style.position = "absolute";
@@ -355,43 +420,43 @@ class Entity {
             if (controlKeys.length > 1) {
                 this.speed = speed / Math.sqrt(2)
             }
-            if (controlKeys.includes("w") && playerY >= playerSpeed && !controlKeys.includes("s") && this.moveList.Up) {
+            if (controlKeys.includes("w") && playerY >= playerSpeed && !controlKeys.includes("s") && this.moveList.Up && this.Move.Up) {
                 playerY -= playerSpeed;
             }
-            if (controlKeys.includes("s") && playerY <= (this.Stage.clientHeight - 4 * playerSpeed) && !controlKeys.includes("w") && this.moveList.Down) {
+            if (controlKeys.includes("s") && playerY <= (this.Stage.offsetHeight - this.Entity.offsetHeight) && !controlKeys.includes("w") && this.moveList.Down && this.Move.Down) {
                 playerY += playerSpeed;
             }
-            if (controlKeys.includes("a") && playerX >= playerSpeed && !controlKeys.includes("d") && this.moveList.Left) {
+            if (controlKeys.includes("a") && playerX >= playerSpeed && !controlKeys.includes("d") && this.moveList.Left && this.Move.Left) {
                 playerX -= playerSpeed;
             }
-            if (controlKeys.includes("d") && playerX <= (this.Stage.clientWidth - 4 * playerSpeed) && !controlKeys.includes("a") && this.moveList.Right) {
+            if (controlKeys.includes("d") && playerX <= (this.Stage.offsetWidth - this.Entity.offsetWidth) && !controlKeys.includes("a") && this.moveList.Right && this.Move.Right) {
                 playerX += playerSpeed;
             }
             //
             if (playerY <= playerSpeed && controlKeys.includes("w")) {
                 playerY = 0
             }
-            if (controlKeys.includes("s") && playerY >= (this.Stage.clientHeight)) {
+            if (controlKeys.includes("s") && playerY >= (this.Stage.offsetHeight - this.Entity.offsetHeight)) {
                 playerY = this.Stage.clientHeight - this.Entity.offsetHeight;
             }
             if (controlKeys.includes("a") && playerX <= playerSpeed) {
                 playerX = 0;
             }
-            if (controlKeys.includes("d") && playerX >= (this.Stage.clientWidth)) {
+            if (controlKeys.includes("d") && playerX >= (this.Stage.offsetWidth - this.Entity.offsetWidth)) {
                 playerX = this.Stage.clientWidth - this.Entity.clientWidth;
             }
             //
             if (!this.moveList.Up && !controlKeys.includes("s") && controlKeys.includes("w")) {
-                playerY = this.ColliderData.top[0].offsetTop + this.ColliderData.top[0].offsetHeight
+                playerY = this.ColliderData.top.at(-1).offsetTop + this.ColliderData.top[0].offsetHeight+0
             }
             if (!this.moveList.Down && !controlKeys.includes("w") && controlKeys.includes("s")) {
-                playerY = this.ColliderData.bottom[0].offsetTop - this.Entity.offsetHeight
+                playerY = this.ColliderData.bottom[0].offsetTop - this.Entity.offsetHeight-0
             }
             if (!this.moveList.Left && !controlKeys.includes("d") && controlKeys.includes("a")) {
-                playerX = this.ColliderData.left[0].offsetLeft + this.ColliderData.left[0].offsetWidth
+                playerX = this.ColliderData.left.at(-1).offsetLeft + this.ColliderData.left[0].offsetWidth +0
             }
             if (!this.moveList.Right && !controlKeys.includes("a") && controlKeys.includes("d")) {
-                playerX = this.ColliderData.right[0].offsetLeft - this.Entity.offsetWidth
+                playerX = this.ColliderData.right[0].offsetLeft - this.Entity.offsetWidth-0
             }
 
             player.style.top = playerY + "px"
@@ -485,13 +550,12 @@ class Entity {
                 // BOTTOM RIGHT
                 case "bottomRight":
                     Box.style.backgroundColor = "yellow"
-
                     break;
             }
             this.DetectCollisionList.forEach((Data) => {
                 document.querySelectorAll(`${Data}`).forEach((BoxB) => {
                     if (
-                        Box.getBoundingClientRect().left < BoxB.getBoundingClientRect().right &&
+                        (Box.getBoundingClientRect().left) < BoxB.getBoundingClientRect().right &&
                         Box.getBoundingClientRect().right > BoxB.getBoundingClientRect().left &&
                         Box.getBoundingClientRect().top < BoxB.getBoundingClientRect().bottom &&
                         Box.getBoundingClientRect().bottom > BoxB.getBoundingClientRect().top
@@ -532,159 +596,125 @@ class Entity {
             );
 
         AllcollisionBox.forEach((ele) => {
-
+                //Long.... Yet EZ. 🛠️
             switch (ele.dataset.collisionside) {
 
                 // TOP
-                case "top":
+                case "top": {
+                    const yDistance = Math.max(this.speed, Math.abs(this.Yforce));
 
-                    ele.style.top =
-                        `${this.Entity.offsetTop - this.speed}px`;
-
-                    ele.style.left =
-                        `${this.Entity.offsetLeft}px`;
-
-                    ele.style.width =
-                        `${this.Entity.offsetWidth}px`;
-
-                    ele.style.height =
-                        `${this.speed}px`;
+                    ele.style.top = `${this.Entity.offsetTop - yDistance}px`;
+                    ele.style.left = `${this.Entity.offsetLeft}px`;
+                    ele.style.width = `${this.Entity.offsetWidth}px`;
+                    ele.style.height = `${yDistance}px`;
                     ele.style.position = "absolute";
 
                     break;
+                }
 
 
                 // BOTTOM
-                case "bottom":
+                case "bottom": {
+                    const yDistance = Math.max(this.speed, Math.abs(this.Yforce));
 
-                    ele.style.top =
-                        `${this.Entity.offsetTop + this.Entity.offsetHeight}px`;
-
-                    ele.style.left =
-                        `${this.Entity.offsetLeft}px`;
-
-                    ele.style.width =
-                        `${this.Entity.offsetWidth}px`;
-
-                    ele.style.height =
-                        `${this.speed}px`;
+                    ele.style.top = `${this.Entity.offsetTop + this.Entity.offsetHeight}px`;
+                    ele.style.left = `${this.Entity.offsetLeft}px`;
+                    ele.style.width = `${this.Entity.offsetWidth}px`;
+                    ele.style.height = `${yDistance}px`;
                     ele.style.position = "absolute";
 
                     break;
+                }
 
 
                 // LEFT
-                case "left":
+                case "left": {
+                    const xDistance = Math.max(this.speed, Math.abs(this.Xforce));
 
-                    ele.style.top =
-                        `${this.Entity.offsetTop}px`;
-
-                    ele.style.left =
-                        `${this.Entity.offsetLeft - this.speed}px`;
-
-                    ele.style.width =
-                        `${this.speed}px`;
-
-                    ele.style.height =
-                        `${this.Entity.offsetHeight}px`;
+                    ele.style.top = `${this.Entity.offsetTop+1}px`;
+                    ele.style.left = `${this.Entity.offsetLeft - xDistance}px`;
+                    ele.style.width = `${xDistance}px`;
+                    ele.style.height = `${this.Entity.offsetHeight-2}px`;
                     ele.style.position = "absolute";
 
                     break;
+                }
 
 
                 // RIGHT
-                case "right":
-                    ele.style.top =
-                        `${this.Entity.offsetTop}px`;
+                case "right": {
+                    const xDistance = Math.max(this.speed, Math.abs(this.Xforce));
 
-                    ele.style.left =
-                        `${this.Entity.offsetLeft + this.Entity.offsetWidth}px`;
-
-                    ele.style.width =
-                        `${this.speed}px`;
-
-                    ele.style.height =
-                        `${this.Entity.offsetHeight}px`;
+                    ele.style.top = `${this.Entity.offsetTop+1}px`;
+                    ele.style.left = `${this.Entity.offsetLeft + this.Entity.offsetWidth}px`;
+                    ele.style.width = `${xDistance}px`;
+                    ele.style.height = `${this.Entity.offsetHeight-2}px`;
                     ele.style.position = "absolute";
 
                     break;
+                }
 
 
                 // TOP LEFT
-                case "topLeft":
+                case "topLeft": {
+                    const xDistance = Math.max(this.speed, Math.abs(this.Xforce));
+                    const yDistance = Math.max(this.speed, Math.abs(this.Yforce));
 
-                    ele.style.top =
-                        `${this.Entity.offsetTop - this.speed}px`;
-
-                    ele.style.left =
-                        `${this.Entity.offsetLeft - this.speed}px`;
-
-                    ele.style.width =
-                        `${this.speed}px`;
-
-                    ele.style.height =
-                        `${this.speed}px`;
+                    ele.style.top = `${this.Entity.offsetTop - yDistance}px`;
+                    ele.style.left = `${this.Entity.offsetLeft - xDistance}px`;
+                    ele.style.width = `${xDistance}px`;
+                    ele.style.height = `${yDistance}px`;
                     ele.style.position = "absolute";
 
                     break;
+                }
 
 
                 // TOP RIGHT
-                case "topRight":
+                case "topRight": {
+                    const xDistance = Math.max(this.speed, Math.abs(this.Xforce));
+                    const yDistance = Math.max(this.speed, Math.abs(this.Yforce));
 
-                    ele.style.top =
-                        `${this.Entity.offsetTop - this.speed}px`;
-
-                    ele.style.left =
-                        `${this.Entity.offsetLeft + this.Entity.offsetWidth}px`;
-
-                    ele.style.width =
-                        `${this.speed}px`;
-
-                    ele.style.height =
-                        `${this.speed}px`;
+                    ele.style.top = `${this.Entity.offsetTop - yDistance}px`;
+                    ele.style.left = `${this.Entity.offsetLeft + this.Entity.offsetWidth}px`;
+                    ele.style.width = `${xDistance}px`;
+                    ele.style.height = `${yDistance}px`;
                     ele.style.position = "absolute";
 
                     break;
+                }
 
 
                 // BOTTOM LEFT
-                case "bottomLeft":
+                case "bottomLeft": {
+                    const xDistance = Math.max(this.speed, Math.abs(this.Xforce));
+                    const yDistance = Math.max(this.speed, Math.abs(this.Yforce));
 
-                    ele.style.top =
-                        `${this.Entity.offsetTop + this.Entity.offsetHeight}px`;
-
-                    ele.style.left =
-                        `${this.Entity.offsetLeft - this.speed}px`;
-
-                    ele.style.width =
-                        `${this.speed}px`;
-
-                    ele.style.height =
-                        `${this.speed}px`;
+                    ele.style.top = `${this.Entity.offsetTop + this.Entity.offsetHeight}px`;
+                    ele.style.left = `${this.Entity.offsetLeft - xDistance}px`;
+                    ele.style.width = `${xDistance}px`;
+                    ele.style.height = `${yDistance}px`;
                     ele.style.position = "absolute";
 
                     break;
+                }
 
 
                 // BOTTOM RIGHT
-                case "bottomRight":
+                case "bottomRight": {
+                    const xDistance = Math.max(this.speed, Math.abs(this.Xforce));
+                    const yDistance = Math.max(this.speed, Math.abs(this.Yforce));
 
-                    ele.style.top =
-                        `${this.Entity.offsetTop + this.Entity.offsetHeight}px`;
-
-                    ele.style.left =
-                        `${this.Entity.offsetLeft + this.Entity.offsetWidth}px`;
-
-                    ele.style.width =
-                        `${this.speed}px`;
-
-                    ele.style.height =
-                        `${this.speed}px`;
+                    ele.style.top = `${this.Entity.offsetTop + this.Entity.offsetHeight}px`;
+                    ele.style.left = `${this.Entity.offsetLeft + this.Entity.offsetWidth}px`;
+                    ele.style.width = `${xDistance}px`;
+                    ele.style.height = `${yDistance}px`;
                     ele.style.position = "absolute";
 
                     break;
+                }
             }
+
 
         });
 
@@ -692,43 +722,61 @@ class Entity {
             this.UpdataCollisionBox();
         });
     }
-    AddForce(X,Y){
+    AddForce(X, Y) {
         this.Xforce += X;
         this.Yforce += Y;
     }
-    ForceLoop(){
-        SetEngineLoop(()=>{
+    ForceLoop() {
+        SetEngineLoop(() => {
+
+            if (this.Xforce != 0) { this.Xforce -= Math.sign(this.Xforce) * this.Friction; }
+            if (this.Yforce != 0) { this.Yforce -= Math.sign(this.Yforce) * this.Friction; }
+
+            const playerX = this.Entity.offsetLeft;
+            const playerY = this.Entity.offsetTop;
+            //TOOK TOO LONG>>> 🥹
             
-        if(this.Xforce != 0){this.Xforce -= Math.sign(this.Xforce)*this.Friction;}
-        if(this.Yforce != 0){this.Yforce -= Math.sign(this.Yforce)*this.Friction;}
+            if (!this.moveList.Left || !this.moveList.Right || playerX <= 0 || playerX + this.Entity.offsetWidth >= this.Stage.offsetWidth) {
+                this.Xforce *= -1
+            }
+            if (!this.moveList.Up || !this.moveList.Down || playerY <= 0 || playerY + this.Entity.offsetHeight >= this.Stage.offsetHeight) {
+                this.Yforce *= -1
+            }
+            this.Entity.style.left =
+                `${playerX + this.Xforce}px`;
 
-        const playerX = this.Entity.offsetLeft;
-        const playerY = this.Entity.offsetTop;
-        if(!this.moveList.Left || !this.moveList.Right || playerX <= 0 || playerX+this.Entity.offsetWidth >= this.Stage.offsetHeight){
-            this.Xforce *= -1
-        }
-        if(!this.moveList.Up || !this.moveList.Down || playerY <= 0 || playerY+this.Entity.offsetHeight >= this.Stage.offsetHeight){
-            this.Yforce *= -1
-        }
-        this.Entity.style.left =
-            `${playerX + this.Xforce}px`;
-
-        this.Entity.style.top =
-            `${playerY + this.Yforce}px`;
+            this.Entity.style.top =
+                `${playerY + this.Yforce}px`;
         })
     }
 }
+SetEngineLoop(() => {
+    if (!Engine.ExperimentalPrtection || DisplayedWarn) { return; }
 
+    Entity.EntityList.forEach((Entities) => {
+        if (
+            Math.abs(Entities.Xforce) >= 90 ||
+            Math.abs(Entities.Yforce) >= 90 ||
+            Entities.speed >= 90
+        ) {
+            window.alert(`Warning! The simulation You are trying to replicate contains unusually high magnitude of physical quantities and the Engine is not advance and may result in inaccurate or unstable physics behavior. We will try to make a better solution for this isssue. 🫡`)
+            DisplayedWarn = true;
+        }
+
+    });
+});
 //Export Functions🫡 //
 export const Engine = {
+    ExperimentalPrtection: true,
     IncializeGame,
     RetainControl,
-    DebugMenuShow,
     SetEngineLoop,
+    DiffOf,
     Entity,
     Stage,
     Page,
     DebugMenu,
+    Geometry,
     get keydown() {
         return keydown;
     }
