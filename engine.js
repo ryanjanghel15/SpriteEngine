@@ -783,4 +783,9 @@ export const Engine = {
 
 }
 EngineLoop();
+let LINK =  document.createElement("link");
+LINK.setAttribute("rel","stylesheet")
+LINK.setAttribute("href","https://cdn.jsdelivr.net/gh/ryanjanghel15/SpriteEngine/style.css")
+
+document.head.appendChild(LINK)
 //
