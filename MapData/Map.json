@@ -1,11 +1,15 @@
 {
     "NameOfMap":"Sample1",
-    "TabCover":"Media/TabCover/TabCover-removebg-preview.png",
-    "WaterMark":"Media/WaterMark/WaterMark1.png",
     "XtoYratio": [6 , 4],
+    "plotColor":{
+        "0":"aquamarine",
+        "1":"rgb(255, 118, 118)",
+        "3":"green"
+    },
     "plot":[1,0,0,0,0,0,
             1,0,0,1,1,1,
             0,0,0,1,1,1,
-            1,0,0,0,0,0],
-    "stageDimentions" : ["600px" ,"400px"]
+            1,0,0,0,0,3],
+    "stageDimentions" : ["600px" ,"400px"],
+    "Style":"margin: 100px 50px"
 }

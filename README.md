@@ -1,4 +1,4 @@
-># SpriteEngine ```Version α-2.1```
+># SpriteEngine ```Version α-2.2```
 Its a Pre-developed Physics Engine Ment for easy implenetation of in real life physics in the web development coumunity.
 
 Sprite Engine is based on Java Script, well known to the the web development coumunity
@@ -51,6 +51,14 @@ Visit: <span title="Not Availble">[SpriteEngine Documentation(🛠️Not Availbl
 <span style="background: #ff000084;">=== Update!! *Version α-2.1* ===</span>
 
 1. Bugs of CSS fixed.
+
+<span style="background: #ff000084;">=== Update!! *Version α-2.2* ===</span><br>
+<i>A part of Project Polish</i>
+
+1. Bugs of CSS fixed.
+2. Added more Debug Fetures
+3. Fixed Force Collision Behavior (Double Detection Prevention)
+4. More Of Pollising
 
 <br>
 <p align="right" >Developed By @ryanjanghel15</p>
