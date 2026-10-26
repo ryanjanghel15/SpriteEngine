@@ -56,9 +56,10 @@ Visit: <span title="Not Availble">[SpriteEngine Documentation(🛠️Not Availbl
 <i>A part of Project Polish</i>
 
 1. Bugs of CSS fixed.
-2. Added more Debug Fetures
-3. Fixed Force Collision Behavior (Double Detection Prevention)
-4. More Of Pollising
+2. Added more Debug Fetures.
+3. Fixed Force Collision Behavior (Double Detection Prevention).
+4. More Of Pollising.
+5. Fixed Position changing in Entities.
 
 <br>
 <p align="right" >Developed By @ryanjanghel15</p>
