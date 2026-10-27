@@ -18,7 +18,7 @@ let AllotDeveloperTools = true;
 // Function Area //
 function IncializeGame() {
     debugMenuShow = false;
-    DebugMenuShow()
+    DebugMenu.Show();
     keydown = "";
     EngineLoopList = []
 
@@ -82,7 +82,7 @@ addEventListener("keydown", (e) => {
 
 });
 window.addEventListener("keydown", (e) => {
-    if (["w", "a", "s", "d"].includes(e.key) && !controlKeys.includes(e.key)) {
+    if (!controlKeys.includes(e.key)) {
         controlKeys.push(e.key);
     }
 });
@@ -430,10 +430,10 @@ class Entity {
     constructor(Name, Sprite, Size, Pose, Stage) {
         this.Name = Name
         this.Entity
-        this.Sprite = Sprite;
+        this.Sprite;
         this.Size = Size;
         this.position = Pose
-        this.speed
+        this.speed = 10;
         this.Friction = 0;
         this.X //READ ONLY
         this.Y //READ ONLY
@@ -452,6 +452,12 @@ class Entity {
             TopRightCollisionBox: null,
             BottomLeftCollisionBox: null,
             BottomRightCollisionBox: null,
+        }
+        this.MoveBtns = {
+            Up: "w",
+            Down: "s",
+            Left:"a",
+            Right:"d",
         }
         this.moveList = {
             Up: true,
@@ -483,10 +489,9 @@ class Entity {
         EntityEle.style.position = "absolute";
         EntityEle.setAttribute("name", this.Name);
 
-        console.log(this.Stage)
         this.StageObj.EntityLayer.appendChild(EntityEle);
         this.Entity = EntityEle
-        this.UpdateSprite()
+        this.UpdateSprite(Sprite);
         this.Entity.style.left = `${this.position[0]}px`
         this.Entity.style.top = `${this.position[1]}px`
         this.X = this.Entity.offsetLeft
@@ -497,16 +502,16 @@ class Entity {
         Entity.EntityList.push(this)
     }
 
-    UpdateSprite() {
+    UpdateSprite(Sprite) {
+        this.Sprite = Sprite;
         let Entity = document.getElementsByName(this.Name)[0]
         Entity.innerHTML = ""
         Entity.style.borderRadius = "0%"
         Entity.style.backgroundColor = "";
         if (typeof this.Sprite === "string") {
             let sprite = document.createElement("img");
+            sprite.setAttribute("name",this.Name);
             sprite.setAttribute("src", this.Sprite);
-            sprite.style.width = this.Size[0];
-            sprite.style.height = this.Size[1];
             Entity.appendChild(sprite);
         }
         else if (typeof this.Sprite === "boolean") {
@@ -518,33 +523,19 @@ class Entity {
                 Entity.style.borderRadius = "100%"
             }
         }
-        Entity.style.width = this.Size[0];
-        Entity.style.height = this.Size[1];
+        this.UpdateSize(this.Size[0],this.Size[1])
     }
-    SetSprite(Data) {
-        this.Sprite = Data;
-
-        let Entity = document.getElementsByName(this.Name)[0]
-        Entity.innerHTML = ""
-        Entity.style.borderRadius = "0%"
-        Entity.style.backgroundColor = "";
+    UpdateSize(Width,Height){
         if (typeof this.Sprite === "string") {
-            let sprite = document.createElement("img");
-            sprite.setAttribute("src", this.Sprite);
-            sprite.style.width = "30px"
-            Entity.appendChild(sprite);
+            let sprite = document.querySelector(`img[name='${this.Name}']`);
+            sprite.style.width = Width;
+            sprite.style.height = Height;
         }
-        else if (typeof this.Sprite === "boolean") {
-            if (this.Sprite) {
-                Entity.style.backgroundColor = "red"
-            }
-            else {
-                Entity.style.backgroundColor = "red"
-                Entity.style.borderRadius = "100%"
-            }
-        }
+        this.Entity.style.width = Width;
+        this.Entity.style.height = Height;
+        this.Size=[Width,Height]
+        console.log(this.Size)
     }
-
     UpdatePosition(Xfunc, Yfunc) {
         this.Entity.style.left = `${Xfunc()}px`;
         this.Entity.style.top = `${Yfunc()}px`;
@@ -558,53 +549,56 @@ class Entity {
         requestAnimationFrame(() => this.UpdateCoordinates());
     }
     AllotControl(speed) {
+        this.speed = speed
         SetEngineLoop(() => {
             if (!this.RequestRetainControl) {
                 let player = this.Entity
-                let playerSpeed = speed;
-                this.speed = speed
+                let playerSpeed = this.speed;
                 let playerX = player.offsetLeft
                 let playerY = player.offsetTop
 
                 if (controlKeys.length > 1) {
-                    this.speed = speed / Math.sqrt(2)
+                    playerSpeed = speed / Math.sqrt(2)
                 }
-                if (controlKeys.includes("w") && playerY >= playerSpeed && !controlKeys.includes("s") && this.moveList.Up && this.Move.Up) {
+                else{
+                    playerSpeed = this.speed
+                }
+                if (controlKeys.includes(this.MoveBtns.Up) && playerY >= playerSpeed && !controlKeys.includes(this.MoveBtns.Down) && this.moveList.Up && this.Move.Up) {
                     playerY -= playerSpeed;
                 }
-                if (controlKeys.includes("s") && playerY <= (this.Stage.offsetHeight - this.Entity.offsetHeight) && !controlKeys.includes("w") && this.moveList.Down && this.Move.Down) {
+                if (controlKeys.includes(this.MoveBtns.Down) && playerY <= (this.Stage.offsetHeight - this.Entity.offsetHeight) && !controlKeys.includes(this.MoveBtns.Up) && this.moveList.Down && this.Move.Down) {
                     playerY += playerSpeed;
                 }
-                if (controlKeys.includes("a") && playerX >= playerSpeed && !controlKeys.includes("d") && this.moveList.Left && this.Move.Left) {
+                if (controlKeys.includes(this.MoveBtns.Left) && playerX >= playerSpeed && !controlKeys.includes(this.MoveBtns.Right) && this.moveList.Left && this.Move.Left) {
                     playerX -= playerSpeed;
                 }
-                if (controlKeys.includes("d") && playerX <= (this.Stage.offsetWidth - this.Entity.offsetWidth) && !controlKeys.includes("a") && this.moveList.Right && this.Move.Right) {
+                if (controlKeys.includes(this.MoveBtns.Right) && playerX <= (this.Stage.offsetWidth - this.Entity.offsetWidth) && !controlKeys.includes(this.MoveBtns.Left) && this.moveList.Right && this.Move.Right) {
                     playerX += playerSpeed;
                 }
                 //
-                if (playerY <= playerSpeed && controlKeys.includes("w")) {
+                if (playerY <= playerSpeed && controlKeys.includes(this.MoveBtns.Up)) {
                     playerY = 0
                 }
-                if (controlKeys.includes("s") && playerY >= (this.Stage.offsetHeight - this.Entity.offsetHeight)) {
+                if (controlKeys.includes(this.MoveBtns.Down) && playerY >= (this.Stage.offsetHeight - this.Entity.offsetHeight)) {
                     playerY = this.Stage.clientHeight - this.Entity.offsetHeight;
                 }
-                if (controlKeys.includes("a") && playerX <= playerSpeed) {
+                if (controlKeys.includes(this.MoveBtns.Left) && playerX <= playerSpeed) {
                     playerX = 0;
                 }
-                if (controlKeys.includes("d") && playerX >= (this.Stage.offsetWidth - this.Entity.offsetWidth)) {
+                if (controlKeys.includes(this.MoveBtns.Right) && playerX >= (this.Stage.offsetWidth - this.Entity.offsetWidth)) {
                     playerX = this.Stage.clientWidth - this.Entity.clientWidth;
                 }
                 //
-                if (!this.moveList.Up && !controlKeys.includes("s") && controlKeys.includes("w")) {
+                if (!this.moveList.Up && !controlKeys.includes(this.MoveBtns.Down) && controlKeys.includes(this.MoveBtns.Up)) {
                     playerY = this.ColliderData.top.at(-1).offsetTop + this.ColliderData.top[0].offsetHeight + 0
                 }
-                if (!this.moveList.Down && !controlKeys.includes("w") && controlKeys.includes("s")) {
+                if (!this.moveList.Down && !controlKeys.includes(this.MoveBtns.Up) && controlKeys.includes(this.MoveBtns.Down)) {
                     playerY = this.ColliderData.bottom[0].offsetTop - this.Entity.offsetHeight - 0
                 }
-                if (!this.moveList.Left && !controlKeys.includes("d") && controlKeys.includes("a")) {
+                if (!this.moveList.Left && !controlKeys.includes(this.MoveBtns.Right) && controlKeys.includes(this.MoveBtns.Left)) {
                     playerX = this.ColliderData.left.at(-1).offsetLeft + this.ColliderData.left[0].offsetWidth + 0
                 }
-                if (!this.moveList.Right && !controlKeys.includes("a") && controlKeys.includes("d")) {
+                if (!this.moveList.Right && !controlKeys.includes(this.MoveBtns.Left) && controlKeys.includes(this.MoveBtns.Right)) {
                     playerX = this.ColliderData.right[0].offsetLeft - this.Entity.offsetWidth - 0
                 }
 
@@ -1027,6 +1021,9 @@ export const Engine = {
     AllotDeveloperTools,
     get keydown() {
         return keydown;
+    },
+    get controlKeys(){
+        return controlKeys;
     },
     set AllotDeveloperTools(value) {
         AllotDeveloperTools = value;

@@ -59,7 +59,15 @@ Visit: <span title="Not Availble">[SpriteEngine Documentation(🛠️Not Availbl
 2. Added more Debug Fetures.
 3. Fixed Force Collision Behavior (Double Detection Prevention).
 4. More Of Pollising.
-5. Fixed Position changing in Entities.
+5. Fixed Updating properties in Entities
+    1. ```UpdateSprite```
+    2. ```UpdateSize```
+    3. ```UpdatePosition```
+    4. ```UpdatePosition```
+    5. ```UpdateCoordinates```
+6. Fixed Diagonal Speed change in Entities
+7. Fixed Automatic Speed updates in Entities
+
 
 <br>
 <p align="right" >Developed By @ryanjanghel15</p>
