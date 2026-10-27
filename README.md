@@ -53,7 +53,7 @@ Visit: <span title="Not Availble">[SpriteEngine Documentation(🛠️Not Availbl
 1. Bugs of CSS fixed.
 
 <span style="background: #ff000084;">=== Update!! *Version α-2.2* ===</span><br>
-<i>A part of Project Polish</i>
+<i>A part of ```Project Polish```</i>
 
 1. Bugs of CSS fixed.
 2. Added more Debug Fetures.
