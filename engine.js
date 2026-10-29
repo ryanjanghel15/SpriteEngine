@@ -51,6 +51,7 @@ function RetainControl() {
 
 // Key Detection
 addEventListener("keypress", (e) => {
+    e.preventDefault();
     keyPress = e.key
     if(e.key)
     switch (e.key) {
@@ -82,14 +83,16 @@ addEventListener("keypress", (e) => {
     }
 
 });
-document.addEventListener("keyup",()=>{keyPress = ""})
+document.addEventListener("keyup",(e)=>{keyPress = "";e.preventDefault();})
 window.addEventListener("keydown", (e) => {
+    e.preventDefault();
     if (!controlKeys.includes(e.key)) {
         controlKeys.push(e.key);
     }
 });
 
 window.addEventListener("keyup", (e) => {
+    e.preventDefault();
     const index = controlKeys.indexOf(e.key);
     if (index !== -1) {
         controlKeys.splice(index, 1);
@@ -977,6 +980,7 @@ PointerDataEle.style.cssText = "position: fixed;pointer-events: none;height: aut
 PointerDataEle.setAttribute("id", "PointerDataEle")
 debugMenu.appendChild(PointerDataEle)
 document.addEventListener("mousemove", (e) => {
+    e.preventDefault();
     PointerDataEle.style.top = `${e.clientY + 10}px`
     PointerDataEle.style.left = `${e.clientX + 10}px`
     if (!e.target.closest("#debugMenu") && e.target.closest(".Stage")) {
