@@ -7,7 +7,7 @@ document.body.appendChild(debugMenu);
 
 //JUst Vatribles 👍//
 let debugMenuShow = false;
-let keydown = "";
+let keyPress = "";
 let controlKeys = []
 let AllotControlanimationId = null;
 let EngineLoopList = [];
@@ -19,7 +19,7 @@ let AllotDeveloperTools = true;
 function IncializeGame() {
     debugMenuShow = false;
     DebugMenu.Show();
-    keydown = "";
+    keyPress = "";
     EngineLoopList = []
 
 
@@ -51,7 +51,7 @@ function RetainControl() {
 
 // Key Detection
 addEventListener("keypress", (e) => {
-    keydown = e.key
+    keyPress = e.key
     if(e.key)
     switch (e.key) {
         case "`":
@@ -82,7 +82,7 @@ addEventListener("keypress", (e) => {
     }
 
 });
-document.addEventListener("keyup",()=>{keydown = ""})
+document.addEventListener("keyup",()=>{keyPress = ""})
 window.addEventListener("keydown", (e) => {
     if (!controlKeys.includes(e.key)) {
         controlKeys.push(e.key);
@@ -1021,8 +1021,8 @@ export const Engine = {
     Geometry,
     debugMenuShow,
     AllotDeveloperTools,
-    get keydown() {
-        return keydown;
+    get keyPress() {
+        return keyPress;
     },
     get controlKeys(){
         return controlKeys;
