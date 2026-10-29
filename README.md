@@ -67,6 +67,7 @@ Visit: <span title="Not Availble">[SpriteEngine Documentation(🛠️Not Availbl
     5. ```UpdateCoordinates```
 6. Fixed Diagonal Speed change in Entities
 7. Fixed Automatic Speed updates in Entities
+8. Changed from ```KeyDown``` to ```KeyPress``` (ie. <s>```keydown```</s>)
 
 
 <br>

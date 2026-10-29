@@ -74,7 +74,7 @@ player.Friction = -0.01;
 player.AddForce(1,1);
 */
 Engine.SetEngineLoop(() => {
-    console.log(player.speed);
+    console.log(Engine.keydown);
     if (Engine.keydown == "p") {
         player.UpdateSprite("Media/Sprite/TabCover-removebg-preview.png")
         player.UpdateSize("50px","50px")

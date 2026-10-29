@@ -50,8 +50,9 @@ function RetainControl() {
 
 
 // Key Detection
-addEventListener("keydown", (e) => {
+addEventListener("keypress", (e) => {
     keydown = e.key
+    if(e.key)
     switch (e.key) {
         case "`":
             debugMenuShow = !debugMenuShow;
@@ -81,6 +82,7 @@ addEventListener("keydown", (e) => {
     }
 
 });
+document.addEventListener("keyup",()=>{keydown = ""})
 window.addEventListener("keydown", (e) => {
     if (!controlKeys.includes(e.key)) {
         controlKeys.push(e.key);
