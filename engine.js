@@ -50,7 +50,7 @@ function RetainControl() {
 
 
 // Key Detection
-addEventListener("keypress", (e) => {
+addEventListener("keydown", (e) => {
     e.preventDefault();
     keyPress = e.key
     if(e.key)
